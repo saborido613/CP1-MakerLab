@@ -192,3 +192,11 @@ Todos os componentes serão instalados sobre um chassi de acrílico, buscando um
 | **Estrutura** | Chassi de acrílico |
 | **Apoio** | Roda boba |
 | **Controle de movimento** | Frente, trás, esquerda e direita |
+
+# 11. Integrantes
+
+- João Saborido | RM98184
+- Matheus Haruo | RM97663
+- Pedro Guerra | ?
+- Lucca Alexandre | RM99700
+- Victor Wittner | RM98667
