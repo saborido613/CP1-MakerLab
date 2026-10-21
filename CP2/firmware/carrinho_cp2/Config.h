@@ -7,10 +7,13 @@
 #endif
 
 namespace cfg {
-constexpr int IN1 = 18;
-constexpr int IN2 = 5;
-constexpr int IN3 = 12;
-constexpr int IN4 = 14;
+// Ponte H: mesmos pinos do carrinho do CP1 (SRC/CodigoCarrinho).
+constexpr int IN1 = 23;
+constexpr int IN2 = 22;
+constexpr int IN3 = 18;
+constexpr int IN4 = 19;
+// HC-SR04: PENDENTE confirmar no carrinho em quais GPIOs do ESP32 o sensor
+// esta ligado. O ECHO de 5 V precisa de divisor de tensao para o ESP32.
 constexpr int TRIG = 26;
 constexpr int ECHO = 25;
 
@@ -33,6 +36,6 @@ constexpr int PWM_LENTO = 150;
 constexpr int PWM_NORMAL = 190;
 constexpr int PWM_MANOBRA = 150;
 
-constexpr const char* SSID = "Carrinho-ESP32";
+constexpr const char* SSID = "Carrinho-Grupo";
 constexpr const char* SENHA = "12345678";
 }
