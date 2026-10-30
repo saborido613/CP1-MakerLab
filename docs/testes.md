@@ -41,4 +41,4 @@ O carrinho atende ao MVP e aos itens **Must** do MoSCoW:
 
 Pendências assumidas: velocidade variável (resolvida no CP2) e reação a obstáculos com o sensor (em andamento no CP2).
 
-Vídeo e fotos do funcionamento: [`Evidencias/`](../Evidencias/).
+Vídeos do funcionamento: [controle pelo celular](../Evidencias/video_controle_celular.mp4) e [carrinho andando](../Evidencias/video_funcionamento.mp4). Foto do carrinho final e demais evidências: [`Evidencias/`](../Evidencias/).
