@@ -12,8 +12,7 @@ Evolução do carrinho do CP1: o sensor ultrassônico do próprio carrinho colet
 |---|---|
 | João Saborido | 98184 |
 | Matheus Haruo | 97663 |
-| Pedro Guerra | *preencher* |
-| Lucca Alexandre | 99700 |
+| Pedro Guerra | 99526 |
 | Victor Wittner | 98667 |
 
 ## Base utilizada
@@ -157,4 +156,4 @@ O carrinho só avança se houver leitura válida do sensor, inferência recente 
 - [ ] Exportar a biblioteca, ajustar o `#include` e ativar `USAR_TINYML 1`
 - [ ] Testar no carrinho a parada e a mudança de velocidade pela classe inferida
 - [ ] Gravar o vídeo da demonstração e colocar o link aqui
-- [ ] Preencher o RM do Pedro Guerra
+- [x] Preencher o RM do Pedro Guerra
