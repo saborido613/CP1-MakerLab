@@ -1,13 +1,40 @@
+/*
+ * CP1 - Maker Lab | Carrinho 2WD controlado por Wi-Fi
+ * Integrantes: Joao Saborido (RM98184), Matheus Haruo (RM97663),
+ *              Pedro Guerra (RM99526), Victor Wittner (RM98667)
+ *
+ * Como funciona:
+ *  1. O ESP32 cria a propria rede Wi-Fi (modo Access Point) "Carrinho-Grupo".
+ *  2. O celular entra nessa rede e abre http://192.168.4.1 no navegador.
+ *  3. O ESP32 responde com uma pagina (PAGINA, abaixo) que tem os botoes de direcao.
+ *  4. Enquanto um botao fica pressionado, a pagina envia /cmd?d=F|B|L|R a cada 200 ms.
+ *  5. Cada comando liga os pinos IN1..IN4 da ponte H L298N, que gira os motores.
+ *  6. Se o ESP32 ficar 600 ms sem receber comando (botao solto ou conexao caiu),
+ *     o carrinho para sozinho (failsafe).
+ *
+ * Por que Wi-Fi e nao Bluetooth: o projeto previa um modulo Bluetooth, mas
+ * todos os integrantes usam iPhone, que nao conversa com Bluetooth classico (SPP).
+ * Com o ESP32 o controle passou a ser uma pagina web, que funciona em qualquer celular.
+ *
+ * Placa na Arduino IDE: "ESP32 Dev Module" (pacote esp32 da Espressif).
+ */
+
 #include <WiFi.h>
 #include <WebServer.h>
 
 // ---------- Pinos da ponte H (L298N) ----------
+// IN1/IN2 controlam o motor esquerdo e IN3/IN4 o motor direito.
+// ENA/ENB nao estao ligados ao ESP32: os jumpers da L298N ficam colocados,
+// entao os motores sempre giram com a tensao total da bateria.
 #define IN1 23
 #define IN2 22
 #define IN3 18
 #define IN4 19
 // #define ENA 5
 // #define ENB 23   // GPIO6 NÃO pode ser usado no ESP32 (é ligado à memória flash)
+// O ENB chegou a ser planejado no GPIO6, que nao pode ser usado (GPIO 6 a 11
+// sao da memoria flash). Por isso o controle de velocidade por PWM ficou
+// desativado nesta entrega e foi retomado no CP2 (PWM direto nos pinos IN).
 
 // ---------- Rede Wi-Fi criada pelo ESP32 ----------
 const char *SSID = "Carrinho-Grupo";
@@ -15,12 +42,16 @@ const char *SENHA = "12345678"; // mínimo de 8 caracteres
 
 WebServer server(80);
 
+// Valor recebido do slider da pagina. Fica guardado, mas so tem efeito
+// quando ENA/ENB forem ligados a pinos PWM (ver aplicarVelocidade).
 int velocidade = 200; // 0 a 255
 char estado = 'S';    // F, B, L, R ou S
 unsigned long ultimoComando = 0;
 const unsigned long TIMEOUT_MS = 600; // para o carro se o celular parar de mandar comandos
 
 // ---------- Página do controle ----------
+// HTML/CSS/JS guardado na memoria flash (PROGMEM) e enviado ao celular na rota "/".
+// Usa eventos "pointer" para funcionar com toque no iPhone e no Android.
 const char PAGINA[] PROGMEM = R"rawliteral(
 <!DOCTYPE html>
 <html lang="pt-BR">
@@ -82,6 +113,9 @@ const char PAGINA[] PROGMEM = R"rawliteral(
 )rawliteral";
 
 // ---------- Motores ----------
+// Tabela verdade usada (por motor): IN_a=HIGH e IN_b=LOW -> gira para frente;
+// IN_a=LOW e IN_b=HIGH -> gira para tras; ambos LOW -> parado.
+// As curvas sao feitas girando as rodas em sentidos opostos (giro no proprio eixo).
 // void aplicarVelocidade() {
 //  analogWrite(ENA, velocidade);
 // analogWrite(ENB, velocidade);
@@ -127,6 +161,7 @@ void stopMotors()
     digitalWrite(IN4, LOW);
 }
 
+// Converte a letra recebida em movimento. Qualquer letra desconhecida para o carro.
 void executar(char d)
 {
     switch (d)
@@ -152,6 +187,9 @@ void executar(char d)
 }
 
 // ---------- Rotas do servidor ----------
+// "/"    -> devolve a pagina de controle
+// "/cmd" -> recebe a direcao (?d=F, B, L, R ou S)
+// "/vel" -> recebe a velocidade do slider (?v=80..255)
 void handleRoot()
 {
     server.send_P(200, "text/html", PAGINA);
