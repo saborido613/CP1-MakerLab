@@ -1,9 +1,10 @@
-// GLOBAL SOLUTION - CitizenTech - Etapa 3 (IA)
-// Carrinho 2WD (ESP32 + L298N) que monitora a iluminacao de espacos publicos.
+// GLOBAL SOLUTION - CitizenTech - ForaDoPico: robo-sensor de estacao (Maker Lab)
+// Carrinho 2WD (ESP32 + L298N) que faz a ronda em plataformas de trem/metro medindo
+// iluminacao, temperatura e umidade, com alertas e relatorios gerados por IA.
 //  - Controle manual e modo PATRULHA pelo celular (pagina web)
 //  - Le LDR (GPIO 34) e DHT (GPIO 4) e classifica a iluminacao: adequada / baixa / critica
 //  - Ao entrar em zona escura: o carrinho PARA, registra a ocorrencia e pede um ALERTA a IA (Gemini)
-//  - Botao "GERAR RELATORIO (IA)": resumo da patrulha para a equipe de manutencao
+//  - Botao "RELATORIO DA RONDA (IA)": resumo da ronda para a equipe da estacao
 //  - O celular mostra o texto da IA e pode FALAR o alerta em voz alta
 //
 // IMPORTANTE:
@@ -20,6 +21,14 @@
 #include <ArduinoJson.h>
 #include <DHT.h>
 #include "secrets.h"
+
+// ---------- Contexto ForaDoPico (opcionais; podem ser definidos no secrets.h) ----------
+#ifndef ESTACAO_NOME
+#define ESTACAO_NOME "Estacao de teste"
+#endif
+#ifndef LINHA_NOME
+#define LINHA_NOME "Linha 3-Vermelha"
+#endif
 
 // ---------- Pinos da ponte H (L298N) ----------
 #define IN1 23
@@ -84,7 +93,7 @@ const char PAGINA[] PROGMEM = R"rawliteral(
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
-<title>Carrinho</title>
+<title>ForaDoPico</title>
 <style>
   * { -webkit-user-select:none; user-select:none; -webkit-touch-callout:none; box-sizing:border-box; }
   body { margin:0; font-family:-apple-system, sans-serif; background:#111; color:#eee;
@@ -108,9 +117,9 @@ const char PAGINA[] PROGMEM = R"rawliteral(
 </style>
 </head>
 <body>
-  <h1>Carrinho CitizenTech</h1>
+  <h1>ForaDoPico · Sensor de estação</h1>
   <div class="painel">
-    Iluminação: <span id="classe" class="adequada">--</span><br>
+    Iluminação da plataforma: <span id="classe" class="adequada">--</span><br>
     Luz: <span id="pct">--</span>% | <span id="temp">--</span> &deg;C | <span id="umid">--</span>% umid.
     <div id="aviso"></div>
   </div>
@@ -121,7 +130,7 @@ const char PAGINA[] PROGMEM = R"rawliteral(
     <div class="vazio"></div><button data-d="B">&#9660;</button><div class="vazio"></div>
   </div>
   <button id="btnAuto" class="larga">PATRULHAR</button>
-  <button id="btnRel" class="larga">GERAR RELATÓRIO (IA)</button>
+  <button id="btnRel" class="larga">RELATÓRIO DA RONDA (IA)</button>
   <button id="btnVoz" class="larga">VOZ: DESLIGADA</button>
 <script>
   let timer = null, autoOn = false, ultimoId = 0, vozOn = false;
@@ -174,7 +183,7 @@ const char PAGINA[] PROGMEM = R"rawliteral(
       document.getElementById('temp').textContent = (s.temp === null) ? '--' : s.temp;
       document.getElementById('umid').textContent = (s.umid === null) ? '--' : s.umid;
       document.getElementById('aviso').textContent =
-        s.escura ? 'ZONA ESCURA detectada - carrinho parado' : (s.auto ? 'Modo patrulha ativo' : '');
+        s.escura ? 'TRECHO ESCURO detectado - carrinho parado' : (s.auto ? 'Modo patrulha ativo' : '');
       autoOn = s.auto;
       document.getElementById('btnAuto').textContent = autoOn ? 'PARAR PATRULHA' : 'PATRULHAR';
       if (s.alertaId !== ultimoId) {
@@ -258,14 +267,16 @@ void definirAlerta(const String &texto) {
 }
 
 String montarPrompt(char tipo) {
-  String p = "Voce e o assistente de um robo que monitora a iluminacao de espacos publicos (projeto CitizenTech). ";
+  String p = "Voce e o assistente do ForaDoPico, plataforma que ajuda trabalhadores que usam trem e metro na Grande Sao Paulo a fugir dos horarios de lotacao. ";
+  p += "Um robo-sensor faz a ronda na plataforma da estacao " + String(ESTACAO_NOME) + " (" + String(LINHA_NOME) + "), medindo iluminacao, temperatura e umidade. ";
   p += "Responda em portugues do Brasil, sem markdown e sem emojis, ";
   if (tipo == 'A') {
-    p += "com um alerta imediato de no maximo 3 frases curtas para a equipe de manutencao da iluminacao publica, incluindo UMA acao recomendada.\n";
+    p += "com um alerta imediato de no maximo 4 frases curtas para a equipe da estacao e para os passageiros, sobre seguranca e conforto na plataforma, incluindo UMA acao recomendada.\n";
   } else {
-    p += "com um relatorio resumido da patrulha de no maximo 5 frases curtas para a equipe de manutencao, priorizando as acoes recomendadas.\n";
+    p += "com um relatorio resumido da ronda de no maximo 5 frases curtas para a equipe da estacao, priorizando as acoes recomendadas.\n";
   }
-  p += "Classificacao da luz: adequada, baixa ou critica (critica significa trecho muito escuro, com risco para pedestres).\n";
+  p += "Classificacao da iluminacao: adequada, baixa ou critica (critica significa trecho muito escuro da plataforma, com risco para a seguranca dos passageiros).\n";
+  p += "Cite sempre a temperatura e a umidade medidas e diga se o conforto termico esta adequado. Se estiverem altas, isso pode indicar plataforma abafada, mas nao afirme que ha lotacao: apenas sugira verificar o local.\n";
   p += "Leitura atual: luz " + String(luzPct) + "% (" + classe + ")";
   if (!isnan(temp)) p += ", temperatura " + String(temp, 1) + " C";
   if (!isnan(umid)) p += ", umidade " + String(umid, 0) + "%";
