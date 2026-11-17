@@ -1,12 +1,10 @@
 # GS — Maker Lab: robô-sensor de estação (ForaDoPico)
 
-> Antes de entregar, preencha os três itens marcados com `[PREENCHER]`: link da proposta do grupo, link do vídeo e integrantes.
-
 ## Contexto (CitizenTech)
 
 O **ForaDoPico** é a proposta do nosso grupo para a Global Solution: uma plataforma de escala presencial inteligente para trabalhadores CLT que usam trem e metrô na Grande São Paulo. O RH informa quantas pessoas precisa no escritório em cada dia, e o app monta a escala fugindo dos horários de pico, que são os mais lotados.
 
-O problema é a lotação no pico, que gera desconforto e insegurança para quem depende do transporte sobre trilhos. Os dados e as fontes estão na proposta do grupo: `[PREENCHER: link ou referência da proposta]`.
+O problema é a lotação no pico, que gera desconforto e insegurança para quem depende do transporte sobre trilhos.
 
 ## Papel do robô no produto
 
@@ -127,10 +125,11 @@ O `secrets.h` está no `.gitignore` e **nunca deve ser enviado ao GitHub**.
 - A conexão com a IA não valida o certificado do servidor (simplificação para o projeto escolar).
 - Os limites de luz foram calibrados para o ambiente e o módulo LDR usados nos testes e podem precisar de ajuste em outro local.
 
-## Vídeo demonstrativo
-
-`[PREENCHER: link do vídeo de até 6 minutos]`
-
 ## Integrantes
 
-`[PREENCHER]`
+| Integrante | RM |
+|---|---|
+| João Saborido | 98184 |
+| Matheus Haruo | 97663 |
+| Pedro Guerra | 99526 |
+| Victor Wittner | 98667 |
