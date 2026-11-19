@@ -2,6 +2,8 @@
 
 ## Contexto (CitizenTech)
 
+##LINK DO VIDEO: https://youtu.be/lqZVOnWQeUQ
+
 O **ForaDoPico** é a proposta do nosso grupo para a Global Solution: uma plataforma de escala presencial inteligente para trabalhadores CLT que usam trem e metrô na Grande São Paulo. O RH informa quantas pessoas precisa no escritório em cada dia, e o app monta a escala fugindo dos horários de pico, que são os mais lotados.
 
 O problema é a lotação no pico, que gera desconforto e insegurança para quem depende do transporte sobre trilhos.
